@@ -9,10 +9,44 @@ import Field from "../components/Field";
 import Icon from "../components/Icon";
 import Bar from "../components/Bar";
 import Pill from "../components/Pill";
+import AssignmentDetail from "./AssignmentDetail";
 
 
 function AssignmentsPage({ role }) {
   const [showForm,setShowForm]=useState(false);
+  const [dueDateFilter,setDueDateFilter]=useState("All");
+  const [programmeFilter,setProgrammeFilter]=useState("All");
+  const [selectedAssignmentId,setSelectedAssignmentId]=useState(null);
+
+  const programmes=["All",...new Set(ASSIGNMENTS.map(a=>a.programme))];
+
+  const getDueDateCategory=(dueStr)=>{
+    const dueDate=new Date(dueStr);
+    const today=new Date();
+
+    dueDate.setHours(0,0,0,0);
+    today.setHours(0,0,0,0);
+
+    const diffDays=(dueDate-today)/(1000*60*60*24);
+
+    if(diffDays<0)return"Overdue";
+    if(diffDays<=7)return"This Week";
+    if(diffDays<=14)return"Next Week";
+    return"Later";
+  };
+
+  const filteredAssignments=ASSIGNMENTS.filter(a=>{
+    const dueDateMatch=dueDateFilter==="All"||
+      (dueDateFilter==="Completed"&&a.status==="Closed")||
+      getDueDateCategory(a.due)===dueDateFilter;
+    const programmeMatch=programmeFilter==="All"||a.programme===programmeFilter;
+    return dueDateMatch&&programmeMatch;
+  });
+
+  if(selectedAssignmentId){
+    return <AssignmentDetail assignmentId={selectedAssignmentId} role={role} onBack={()=>setSelectedAssignmentId(null)}/>;
+  }
+
   return (
     <div style={{padding:32}}>
       <SH title="Assignments" sub="Manage and track all assignments" onAction={role!=="scholar"?()=>setShowForm(!showForm):null} actionIcon="plus" actionLabel="New Assignment"/>
@@ -33,12 +67,38 @@ function AssignmentsPage({ role }) {
           </div>
         </Card>
       )}
+      <div style={{marginBottom:24}}>
+        <div style={{marginBottom:16}}>
+          <div style={{fontSize:12,fontWeight:700,color:T.navy,marginBottom:8,textTransform:"uppercase",letterSpacing:0.5}}>Due Date</div>
+          <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+            {["All","Completed","Overdue","This Week","Next Week","Later"].map(filter=>(
+              <button key={filter} onClick={()=>setDueDateFilter(filter)} style={{padding:"8px 18px",borderRadius:9,
+                border:`1.5px solid ${dueDateFilter===filter?T.navy:T.border}`,cursor:"pointer",
+                background:dueDateFilter===filter?T.navy:T.white,color:dueDateFilter===filter?T.white:T.textMid,
+                fontWeight:600,fontSize:13,fontFamily:"'DM Sans',sans-serif",transition:"all .14s"}}>{filter}</button>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <div style={{fontSize:12,fontWeight:700,color:T.navy,marginBottom:8,textTransform:"uppercase",letterSpacing:0.5}}>Programmes</div>
+          <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+            {programmes.map(programme=>(
+              <button key={programme} onClick={()=>setProgrammeFilter(programme)} style={{padding:"8px 18px",borderRadius:9,
+                border:`1.5px solid ${programmeFilter===programme?T.navy:T.border}`,cursor:"pointer",
+                background:programmeFilter===programme?T.navy:T.white,color:programmeFilter===programme?T.white:T.textMid,
+                fontWeight:600,fontSize:13,fontFamily:"'DM Sans',sans-serif",transition:"all .14s",
+                maxWidth:250,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{programme}</button>
+            ))}
+          </div>
+        </div>
+      </div>
       <div style={{display:"flex",flexDirection:"column",gap:16}}>
-        {ASSIGNMENTS.map(a=>{
+        {filteredAssignments.map(a=>{
           const pct=Math.round(a.submitted/a.total*100);
           return (
             <Card key={a.id}>
-              <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:20}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:20,flexWrap:"wrap"}}>
                 <div style={{flex:1}}>
                   <div style={{display:"flex",alignItems:"center",gap:12,marginBottom:6}}>
                     <div style={{width:38,height:38,borderRadius:10,background:`${T.navy}10`,
@@ -60,8 +120,12 @@ function AssignmentsPage({ role }) {
                     </div>
                   )}
                 </div>
-                <div style={{display:"flex",gap:8,alignItems:"center",flexShrink:0}}>
+                <div style={{display:"flex",gap:8,alignItems:"center",justifyContent:"flex-end",flexShrink:0,flexWrap:"wrap"}}>
                   <Pill label={a.status} v={a.status==="Open"?"success":"default"}/>
+                  <button onClick={()=>setSelectedAssignmentId(a.id)} style={{display:"flex",alignItems:"center",gap:5,padding:"8px 16px",
+                    background:T.white,color:T.navy,border:`1.5px solid ${T.border}`,borderRadius:8,cursor:"pointer",fontSize:12,fontWeight:600,fontFamily:"'DM Sans',sans-serif"}}>
+                    <Icon name="eye" size={12} color={T.navy}/> View
+                  </button>
                   {role!=="scholar"&&<button style={{display:"flex",alignItems:"center",gap:5,padding:"8px 16px",
                     background:T.navy,color:T.white,border:"none",borderRadius:8,cursor:"pointer",fontSize:12,fontWeight:600,fontFamily:"'DM Sans',sans-serif"}}>
                     <Icon name="pencil" size={12} color={T.white}/> Grade
@@ -76,6 +140,13 @@ function AssignmentsPage({ role }) {
             </Card>
           );
         })}
+        {filteredAssignments.length===0&&(
+          <Card>
+            <div style={{fontSize:14,fontWeight:600,color:T.textMid,fontFamily:"'DM Sans',sans-serif"}}>
+              No assignments match the selected filters.
+            </div>
+          </Card>
+        )}
       </div>
     </div>
   );

@@ -26,11 +26,81 @@ export const PROGRAMMES = [
 ];
 
 export const ASSIGNMENTS = [
-  {id:1,title:"Resume Workshop Draft",programme:"Career Development",due:"2026-03-18",submitted:32,total:40,status:"Open"},
-  {id:2,title:"Excel Data Analysis",programme:"Computer Literacy",due:"2026-03-20",submitted:48,total:55,status:"Open"},
-  {id:3,title:"English Essay – Leadership",programme:"English Communication",due:"2026-03-15",submitted:45,total:45,status:"Closed"},
-  {id:4,title:"Business Case Study",programme:"Professional Literacy",due:"2026-03-25",submitted:12,total:60,status:"Open"},
-  {id:5,title:"Public Speaking Recording",programme:"English Communication",due:"2026-03-30",submitted:5,total:45,status:"Open"}
+  {
+    id:1,
+    title:"Resume Workshop Draft",
+    programme:"Career Development",
+    due:"2026-03-18",
+    dueTime:"23:59",
+    submitted:32,
+    total:40,
+    status:"Open",
+    points:null,
+    submissionState:"Not handed in",
+    instructions:"Create the first polished draft of your one-page resume. Highlight your education, achievements, leadership roles, and any project work that supports the career path you want to pursue.",
+    checklist:["One-page resume in PDF format","Clear headline and summary","At least two quantified achievements"],
+    myWork:[]
+  },
+  {
+    id:2,
+    title:"Excel Data Analysis",
+    programme:"Computer Literacy",
+    due:"2026-03-20",
+    dueTime:"18:00",
+    submitted:48,
+    total:55,
+    status:"Open",
+    points:25,
+    submissionState:"Not handed in",
+    instructions:"Download the learner dataset, clean the raw values, create three formulas, and present your findings in a single workbook with a summary sheet for key trends.",
+    checklist:["Completed workbook with formulas","Summary sheet with three insights","Clearly labelled tabs and charts"],
+    myWork:[{name:"analysis_notes.xlsx",size:"168 KB",updated:"Saved today"}]
+  },
+  {
+    id:3,
+    title:"English Essay – Leadership",
+    programme:"English Communication",
+    due:"2026-03-15",
+    dueTime:"23:59",
+    submitted:45,
+    total:45,
+    status:"Closed",
+    points:15,
+    submissionState:"Handed in",
+    instructions:"Write a short reflective essay on leadership using one real example from your academic or community experience. Focus on clarity, structure, and persuasive language.",
+    checklist:["700 to 900 words","One personal example","Strong introduction and conclusion"],
+    myWork:[{name:"leadership_essay_final.pdf",size:"246 KB",updated:"Submitted on 15 Mar 2026"}]
+  },
+  {
+    id:4,
+    title:"Business Case Study",
+    programme:"Professional Literacy",
+    due:"2026-03-25",
+    dueTime:"17:30",
+    submitted:12,
+    total:60,
+    status:"Open",
+    points:30,
+    submissionState:"Not handed in",
+    instructions:"Read the provided business scenario and prepare a concise case study response covering the core challenge, your recommendation, and the expected outcome for the organisation.",
+    checklist:["Problem statement","Recommended action plan","Expected impact in 3 bullet points"],
+    myWork:[]
+  },
+  {
+    id:5,
+    title:"Public Speaking Recording",
+    programme:"English Communication",
+    due:"2026-03-30",
+    dueTime:"20:00",
+    submitted:5,
+    total:45,
+    status:"Open",
+    points:null,
+    submissionState:"Not handed in",
+    instructions:"Record a two-minute speaking practice video based on the topic shared in class. Your submission should demonstrate confidence, pacing, and clear articulation.",
+    checklist:["Video under 2 minutes","Visible speaker frame","Confident opening and closing"],
+    myWork:[{name:"speech_outline.docx",size:"92 KB",updated:"Draft saved yesterday"}]
+  }
 ];
 
 export const RESOURCES = [

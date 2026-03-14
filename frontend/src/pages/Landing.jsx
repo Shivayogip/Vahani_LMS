@@ -4,19 +4,20 @@ import { T } from "../theme";
 
 import Logo from "../components/Logo";
 import Icon from "../components/Icon";
+import backgroundImage from "../assets/DSC02520.jpg";
 
 
 function Landing({ onStart }) {
   const [vis,setVis]=useState(false);
   useEffect(()=>{ const t=setTimeout(()=>setVis(true),80); return()=>clearTimeout(t); },[]);
   return (
-    <div style={{minHeight:"100vh",background:T.navyD,fontFamily:"'DM Sans',sans-serif",overflowX:"hidden"}}>
-      <div style={{position:"fixed",top:-160,right:-120,width:600,height:600,borderRadius:"50%",
-        background:`radial-gradient(circle,${T.sun}14 0%,transparent 70%)`,pointerEvents:"none"}}/>
-      <div style={{position:"fixed",bottom:-200,left:-180,width:700,height:700,borderRadius:"50%",
-        background:`radial-gradient(circle,${T.navyL}28 0%,transparent 70%)`,pointerEvents:"none"}}/>
+    <div style={{minHeight:"100vh",background:T.navyD,fontFamily:"'DM Sans',sans-serif",overflowX:"hidden",
+      backgroundImage:`url(${backgroundImage})`,backgroundSize:"cover",backgroundPosition:"center",
+      backgroundAttachment:"fixed",position:"relative"}}>
+      <div style={{position:"absolute",top:0,left:0,right:0,bottom:0,background:"rgba(0,0,0,.65)",zIndex:0}}/>
+      <div style={{position:"relative",zIndex:1}}>
       <nav style={{position:"relative",zIndex:10,display:"flex",justifyContent:"space-between",
-        alignItems:"center",padding:"24px 64px",borderBottom:"1px solid rgba(255,255,255,.06)"}}>
+        alignItems:"center",padding:"24px 64px",borderBottom:"1px solid rgba(255,255,255,.06)",background:T.navyD}}>
         <Logo width={140} light/>
         <div style={{display:"flex",gap:12}}>
           <button onClick={onStart} style={{padding:"10px 28px",background:"transparent",
@@ -59,7 +60,7 @@ function Landing({ onStart }) {
       <div style={{position:"relative",zIndex:2,maxWidth:860,margin:"0 auto 0",
         background:"rgba(255,255,255,.04)",border:"1px solid rgba(255,255,255,.08)",
         borderRadius:20,padding:"24px 0",display:"grid",gridTemplateColumns:"repeat(4,1fr)"}}>
-        {[["180+","Scholars enrolled"],["6","Active programmes"],["74%","Avg completion"],["4.8","Trainer rating"]].map(([n,l],i)=>(
+        {[["208","Active Scholars"],["6","Active programmes"],["74%","Avg completion"],["4.8","Trainer rating"]].map(([n,l],i)=>(
           <div key={i} style={{textAlign:"center",padding:"0 24px",
             borderRight:i<3?"1px solid rgba(255,255,255,.08)":"none"}}>
             <div style={{fontSize:32,fontWeight:800,color:T.sun,fontFamily:"'Sora',sans-serif",letterSpacing:-1}}>{n}</div>
@@ -94,6 +95,7 @@ function Landing({ onStart }) {
       <div style={{position:"relative",zIndex:2,textAlign:"center",padding:"60px 0 40px",
         color:"rgba(255,255,255,.2)",fontSize:13}}>
         &copy; 2026 Vahani Scholarship Trust. All rights reserved.
+      </div>
       </div>
     </div>
   );

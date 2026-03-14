@@ -9,7 +9,8 @@ const scholarNav = [
   { key: "assignments", icon: "file", label: "Assignments" },
   { key: "resources", icon: "book", label: "Resources" },
   { key: "attendance", icon: "cal", label: "Attendance" },
-  { key: "activities", icon: "clock", label: "Activities" }
+  { key: "activities", icon: "clock", label: "Activities" },
+  { key: "profile", icon: "user", label: "Profile" }
 ];
 
 const adminNav = [
@@ -21,7 +22,8 @@ const adminNav = [
   { key: "attendance", icon: "cal", label: "Attendance" },
   { key: "trainers", icon: "users", label: "Trainers" },
   { key: "activities", icon: "clock", label: "Activities" },
-  { key: "reports", icon: "bar", label: "Reports" }
+  { key: "reports", icon: "bar", label: "Reports" },
+  { key: "profile", icon: "user", label: "Profile" }
 ];
 
 function Sidebar({ page, setPage, role, onLogout }) {

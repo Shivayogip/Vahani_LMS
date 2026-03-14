@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { T } from "../theme";
 import { PROGRAMMES } from "../data/data";
 
@@ -5,9 +6,15 @@ import SH from "../components/SH";
 import Pill from "../components/Pill";
 import Icon from "../components/Icon";
 import Bar from "../components/Bar";
+import ProgrammeDetail from "./ProgrammeDetail";
 
 
 function ProgrammesPage({ role }) {
+  const [selectedProgrammeId, setSelectedProgrammeId] = useState(null);
+
+  if (selectedProgrammeId) {
+    return <ProgrammeDetail programmeId={selectedProgrammeId} onBack={() => setSelectedProgrammeId(null)} />;
+  }
   return (
     <div style={{padding:32}}>
       <SH title="Programmes" sub="All active learning programmes" onAction={role!=="scholar"?()=>{}:null} actionIcon="plus" actionLabel="New Programme"/>
@@ -38,7 +45,7 @@ function ProgrammesPage({ role }) {
                 </div>
               </div>
               <div style={{display:"flex",gap:8}}>
-                <button style={{flex:1,padding:"8px",background:p.color,color:T.white,border:"none",borderRadius:8,
+                <button onClick={() => setSelectedProgrammeId(p.id)} style={{flex:1,padding:"8px",background:p.color,color:T.white,border:"none",borderRadius:8,
                   cursor:"pointer",fontSize:12,fontWeight:600,fontFamily:"'DM Sans',sans-serif",
                   display:"flex",alignItems:"center",justifyContent:"center",gap:5}}>
                   <Icon name="arrowR" size={12} color={T.white}/> Open

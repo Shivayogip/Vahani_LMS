@@ -19,6 +19,7 @@ import AttendancePage from "./pages/AttendancePage";
 import TrainersPage from "./pages/TrainersPage";
 import ActivitiesPage from "./pages/ActivitiesPage";
 import ReportsPage from "./pages/ReportsPage";
+import ProfilePage from "./pages/ProfilePage";
 
 export default function App() {
 
@@ -66,6 +67,9 @@ export default function App() {
       case "reports":
         return <ReportsPage/>
 
+      case "profile":
+        return <ProfilePage role={role}/>
+
       default:
         return null
     }
@@ -102,7 +106,7 @@ export default function App() {
 
         <div style={{flex:1,display:"flex",flexDirection:"column"}}>
 
-          <Topbar page={page} role={role} backendOk={backendOk}/>
+          <Topbar page={page} role={role} backendOk={backendOk} onNav={setPage}/>
 
           <div style={{flex:1,overflowY:"auto"}}>
             {renderPage()}

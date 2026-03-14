@@ -11,19 +11,70 @@ import Pill from "../components/Pill";
 
 function ResourcesPage({ role }) {
   const TM={Video:{icon:"video",color:"#5B35B0"},Document:{icon:"doc",color:T.navy},Notes:{icon:"pencil",color:T.success}};
-  const [filter,setFilter]=useState("All");
-  const filtered=filter==="All"?RESOURCES:RESOURCES.filter(r=>r.type===filter);
+  const [typeFilter,setTypeFilter]=useState("All");
+  const [programmeFilter,setProgrammeFilter]=useState("All");
+  const [dateFilter,setDateFilter]=useState("All");
+  
+  const programmes=["All",...new Set(RESOURCES.map(r=>r.programme))];
+  
+  const getDateCategory=(dateStr)=>{
+    const date=new Date(dateStr);
+    const today=new Date();
+    const diffTime=today-date;
+    const diffDays=diffTime/(1000*60*60*24);
+    if(diffDays<=7)return"Last Week";
+    if(diffDays<=30)return"Last Month";
+    return"Older";
+  };
+  
+  const filtered=RESOURCES.filter(r=>{
+    const typeMatch=typeFilter==="All"||r.type===typeFilter;
+    const progMatch=programmeFilter==="All"||r.programme===programmeFilter;
+    const dateCategory=getDateCategory(r.date);
+    const dateMatch=dateFilter==="All"||dateCategory===dateFilter;
+    return typeMatch&&progMatch&&dateMatch;
+  });
   return (
     <div style={{padding:32}}>
       <SH title="Learning Resources" sub="Programme-wise videos, documents, and notes"
         onAction={role!=="scholar"?()=>{}:null} actionIcon="upload" actionLabel="Upload"/>
-      <div style={{display:"flex",gap:8,marginBottom:24}}>
-        {["All","Video","Document","Notes"].map(f=>(
-          <button key={f} onClick={()=>setFilter(f)} style={{padding:"8px 18px",borderRadius:9,
-            border:`1.5px solid ${filter===f?T.navy:T.border}`,cursor:"pointer",
-            background:filter===f?T.navy:T.white,color:filter===f?T.white:T.textMid,
-            fontWeight:600,fontSize:13,fontFamily:"'DM Sans',sans-serif",transition:"all .14s"}}>{f}</button>
-        ))}
+      
+      <div style={{marginBottom:24}}>
+        <div style={{marginBottom:16}}>
+          <div style={{fontSize:12,fontWeight:700,color:T.navy,marginBottom:8,textTransform:"uppercase",letterSpacing:0.5}}>Resource Type</div>
+          <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+            {["All","Video","Document","Notes"].map(f=>(
+              <button key={f} onClick={()=>setTypeFilter(f)} style={{padding:"8px 18px",borderRadius:9,
+                border:`1.5px solid ${typeFilter===f?T.navy:T.border}`,cursor:"pointer",
+                background:typeFilter===f?T.navy:T.white,color:typeFilter===f?T.white:T.textMid,
+                fontWeight:600,fontSize:13,fontFamily:"'DM Sans',sans-serif",transition:"all .14s"}}>{f}</button>
+            ))}
+          </div>
+        </div>
+
+        <div style={{marginBottom:16}}>
+          <div style={{fontSize:12,fontWeight:700,color:T.navy,marginBottom:8,textTransform:"uppercase",letterSpacing:0.5}}>Programmes</div>
+          <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+            {programmes.map(p=>(
+              <button key={p} onClick={()=>setProgrammeFilter(p)} style={{padding:"8px 18px",borderRadius:9,
+                border:`1.5px solid ${programmeFilter===p?T.navy:T.border}`,cursor:"pointer",
+                background:programmeFilter===p?T.navy:T.white,color:programmeFilter===p?T.white:T.textMid,
+                fontWeight:600,fontSize:13,fontFamily:"'DM Sans',sans-serif",transition:"all .14s",maxWidth:250,overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>{p}</button>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <div style={{fontSize:12,fontWeight:700,color:T.navy,marginBottom:8,textTransform:"uppercase",letterSpacing:0.5}}>Date Created</div>
+          <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+            {["All","Last Week","Last Month","Older"].map(d=>(
+              <button key={d} onClick={()=>setDateFilter(d)} style={{padding:"8px 18px",borderRadius:9,
+                border:`1.5px solid ${dateFilter===d?T.navy:T.border}`,cursor:"pointer",
+                background:dateFilter===d?T.navy:T.white,color:dateFilter===d?T.white:T.textMid,
+                fontWeight:600,fontSize:13,fontFamily:"'DM Sans',sans-serif",transition:"all .14s"}}>{d}</button>
+            ))}
+          </div>
+        </div>
       </div>
       <div style={{display:"grid",gridTemplateColumns:"repeat(3,1fr)",gap:20}}>
         {filtered.map(r=>{
