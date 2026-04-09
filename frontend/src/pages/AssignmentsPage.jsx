@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { apiFetch } from "../api";
 
 import { T } from "../theme";
-import { ASSIGNMENTS } from "../data/data";
 
 import SH from "../components/SH";
 import Card from "../components/Card";
@@ -11,10 +11,11 @@ import Bar from "../components/Bar";
 import Pill from "../components/Pill";
 import AssignmentDetail from "./AssignmentDetail";
 
-
 function AssignmentsPage({ role }) {
 
-  const [assignments,setAssignments]=useState(ASSIGNMENTS);
+  const [assignments,setAssignments]=useState([]);
+  const [courses, setCourses] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const [showForm,setShowForm]=useState(false);
   const [dueDateFilter,setDueDateFilter]=useState("All");
@@ -22,11 +23,36 @@ function AssignmentsPage({ role }) {
   const [selectedAssignmentId,setSelectedAssignmentId]=useState(null);
 
   const [title,setTitle]=useState("");
-  const [programme,setProgramme]=useState("");
+  const [programmeId,setProgrammeId]=useState("");
   const [due,setDue]=useState("");
   const [marks,setMarks]=useState("");
 
-  const programmes=["All",...new Set(assignments.map(a=>a.programme))];
+  useEffect(() => {
+    fetchAssignments();
+    fetchCourses();
+  }, []);
+
+  const fetchAssignments = async () => {
+    try {
+      const data = await apiFetch("/api/assignments");
+      setAssignments(data);
+    } catch (error) {
+      console.error("Error fetching assignments:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchCourses = async () => {
+    try {
+      const data = await apiFetch("/api/courses");
+      setCourses(data);
+    } catch (error) {
+      console.error("Error fetching courses:", error);
+    }
+  };
+
+  const programmes=["All",...new Set(assignments.map(a=>a.course?.name).filter(Boolean))];
 
   const getDueDateCategory=(dueStr)=>{
     const dueDate=new Date(dueStr);
@@ -48,34 +74,38 @@ function AssignmentsPage({ role }) {
       (dueDateFilter==="Completed"&&a.status==="Closed")||
       getDueDateCategory(a.due)===dueDateFilter;
 
-    const programmeMatch=programmeFilter==="All"||a.programme===programmeFilter;
+    const programmeMatch=programmeFilter==="All"||a.course?.name===programmeFilter;
 
     return dueDateMatch&&programmeMatch;
   });
 
-  const createAssignment=()=>{
+  const createAssignment=async ()=>{
 
-    if(!title||!programme||!due) return;
+    if(!title||!programmeId||!due) return;
 
-    const newAssignment={
-      id:Date.now(),
-      title,
-      programme,
-      due,
-      maxMarks:marks,
-      submitted:0,
-      total:0,
-      status:"Open"
-    };
+    try {
+      const newAssignment={
+        title,
+        course: programmeId,
+        due,
+        points: marks,
+      };
 
-    setAssignments([newAssignment,...assignments]);
+      await apiFetch("/api/assignments", {
+        method: "POST",
+        body: JSON.stringify(newAssignment)
+      });
+      fetchAssignments();
 
-    setTitle("");
-    setProgramme("");
-    setDue("");
-    setMarks("");
+      setTitle("");
+      setProgrammeId("");
+      setDue("");
+      setMarks("");
 
-    setShowForm(false);
+      setShowForm(false);
+    } catch (error) {
+      console.error("Error creating assignment:", error);
+    }
   };
 
 
@@ -88,6 +118,8 @@ function AssignmentsPage({ role }) {
       />
     );
   }
+
+  if (loading) return <div style={{padding:32}}>Loading assignments...</div>;
 
   return (
     <div style={{padding:32}}>
@@ -124,9 +156,11 @@ function AssignmentsPage({ role }) {
 
             <Field
               label="Programme"
+              type="select"
               placeholder="Select programme"
-              value={programme}
-              onChange={e=>setProgramme(e.target.value)}
+              value={programmeId}
+              onChange={e=>setProgrammeId(e.target.value)}
+              options={courses.map(c => ({ value: c._id, label: c.name }))}
             />
 
             <Field
@@ -267,10 +301,10 @@ function AssignmentsPage({ role }) {
 
         {filteredAssignments.map(a=>{
 
-          const pct=Math.round((a.submitted/a.total)*100)||0;
+          const pct=Math.round((a.totalSubmissions/(a.course?.enrolled || 1))*100)||0;
 
           return(
-            <Card key={a.id}>
+            <Card key={a._id}>
 
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",gap:20,flexWrap:"wrap"}}>
 
@@ -300,7 +334,7 @@ function AssignmentsPage({ role }) {
                       </div>
 
                       <div style={{fontSize:12,color:T.textSub,marginTop:1}}>
-                        {a.programme} · Due: {a.due}
+                        {a.course?.name} · Due: {new Date(a.due).toLocaleDateString()}
                       </div>
                     </div>
 
@@ -311,7 +345,7 @@ function AssignmentsPage({ role }) {
                       <div style={{display:"flex",justifyContent:"space-between",marginBottom:6}}>
                         <span style={{fontSize:12,color:T.textSub}}>Submissions</span>
                         <span style={{fontSize:12,fontWeight:700,color:T.text}}>
-                          {a.submitted}/{a.total} ({pct}%)
+                          {a.totalSubmissions}/{a.course?.enrolled || 0} ({pct}%)
                         </span>
                       </div>
                       <Bar pct={pct} color={pct>80?T.success:pct>50?T.sun:T.danger} h={5}/>
@@ -325,7 +359,7 @@ function AssignmentsPage({ role }) {
                   <Pill label={a.status} v={a.status==="Open"?"success":"default"}/>
 
                   <button
-                    onClick={()=>setSelectedAssignmentId(a.id)}
+                    onClick={()=>setSelectedAssignmentId(a._id)}
                     style={{
                       display:"flex",
                       alignItems:"center",

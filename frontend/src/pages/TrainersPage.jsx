@@ -1,5 +1,6 @@
+import { useState, useEffect } from "react";
 import { T } from "../theme";
-import { TRAINERS } from "../data/data";
+import { apiFetch } from "../api";
 
 import SH from "../components/SH";
 import Card from "../components/Card";
@@ -8,12 +9,31 @@ import Icon from "../components/Icon";
 
 
 function TrainersPage() {
+  const [trainers, setTrainers] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchTrainers = async () => {
+      try {
+        const data = await apiFetch("/api/users/trainers");
+        setTrainers(data);
+      } catch (error) {
+        console.error("Error fetching trainers:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchTrainers();
+  }, []);
+
+  if (loading) return <div style={{padding:32}}>Loading trainers...</div>;
+
   return (
     <div style={{padding:32}}>
       <SH title="Trainers & Tutors" sub="Manage trainer and tutor profiles" onAction={()=>{}} actionIcon="plus" actionLabel="Add Trainer"/>
       <div style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:20}}>
-        {TRAINERS.map(t=>(
-          <Card key={t.id}>
+        {trainers.map(t=>(
+          <Card key={t._id || t.id}>
             <div style={{display:"flex",gap:14,alignItems:"flex-start",marginBottom:18}}>
               <Av name={t.name} size={52} color={T.navy}/>
               <div style={{flex:1}}>

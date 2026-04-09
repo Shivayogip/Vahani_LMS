@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import { T } from "../theme";
-import { SCHOLARS } from "../data/data";
+import { apiFetch } from "../api";
 
 import SH from "../components/SH";
 import Card from "../components/Card";
@@ -12,15 +12,35 @@ import Kpi from "../components/Kpi";
 
 
 function ReportsPage() {
+  const [scholars, setScholars] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [sending,setSending]=useState(false); const [sent,setSent]=useState(false);
   const [rtype,setRtype]=useState("performance");
   const [recs,setRecs]=useState(["scholars","trainers"]);
   const [freq,setFreq]=useState("one-time");
+
+  useEffect(() => {
+    const fetchScholars = async () => {
+      try {
+        const data = await apiFetch("/api/users/scholars");
+        setScholars(data);
+      } catch (error) {
+        console.error("Error fetching scholars for reports:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchScholars();
+  }, []);
+
   const toggle=r=>setRecs(p=>p.includes(r)?p.filter(x=>x!==r):[...p,r]);
   const doSend=async()=>{
     setSending(true); await new Promise(r=>setTimeout(r,2200));
     setSending(false); setSent(true); setTimeout(()=>setSent(false),3000);
   };
+
+  if (loading) return <div style={{ padding: 32 }}>Loading reports...</div>;
+
   return (
     <div style={{padding:32}}>
       <SH title="Reports & Analytics" sub="Generate and distribute performance reports"/>
@@ -81,8 +101,8 @@ function ReportsPage() {
               display:"flex",alignItems:"center",gap:8}}>
               <Icon name="trend" size={15} color={T.navy}/> Scholar Performance
             </h3>
-            {SCHOLARS.map(s=>(
-              <div key={s.id} style={{display:"flex",alignItems:"center",gap:12,marginBottom:14}}>
+            {scholars.slice(0, 6).map(s=>(
+              <div key={s._id} style={{display:"flex",alignItems:"center",gap:12,marginBottom:14}}>
                 <Av name={s.name} size={30} color={T.navy}/>
                 <div style={{flex:1}}>
                   <div style={{display:"flex",justifyContent:"space-between",marginBottom:5}}>
@@ -96,7 +116,7 @@ function ReportsPage() {
           </Card>
           <div style={{display:"grid",gridTemplateColumns:"repeat(2,1fr)",gap:16}}>
             <Kpi icon="grad"    label="Reports Sent" value="24"  accent={T.navy}/>
-            <Kpi icon="scholars" label="Recipients"  value="180" accent={T.success}/>
+            <Kpi icon="scholars" label="Recipients"  value={scholars.length} accent={T.success}/>
           </div>
         </div>
       </div>

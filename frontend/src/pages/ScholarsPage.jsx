@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { apiFetch } from "../api";
 
 import { T } from "../theme";
-import { SCHOLARS } from "../data/data";
 
 import Av from "../components/Av";
 import Icon from "../components/Icon";
@@ -10,12 +10,31 @@ import Pill from "../components/Pill";
 import SH from "../components/SH";
 import DataTable from "../components/DataTable";
 
-
 function ScholarsPage() {
-  const [search,setSearch]=useState(""); const [filter,setFilter]=useState("All");
-  const f=SCHOLARS.filter(s=>s.name.toLowerCase().includes(search.toLowerCase())&&(filter==="All"||s.status===filter));
+  const [scholars, setScholars] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [search,setSearch]=useState(""); 
+  const [filter,setFilter]=useState("All");
+
+  useEffect(() => {
+    const fetchScholars = async () => {
+      try {
+        const data = await apiFetch("/api/users/scholars");
+        setScholars(data);
+      } catch (error) {
+        console.error("Error fetching scholars:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchScholars();
+  }, []);
+
+  if (loading) return <div style={{padding:32}}>Loading scholars...</div>;
+
+  const f=scholars.filter(s=>s.name.toLowerCase().includes(search.toLowerCase())&&(filter==="All"||s.status===filter));
   const rows=f.map(s=>[
-    <div style={{display:"flex",alignItems:"center",gap:10}}>
+    <div key={s._id} style={{display:"flex",alignItems:"center",gap:10}}>
       <Av name={s.name} size={32} color={T.navy}/>
       <div><div style={{fontWeight:600,color:T.navy,fontSize:13}}>{s.name}</div>
         <div style={{fontSize:11,color:T.textSub}}>{s.email}</div></div>
@@ -33,7 +52,7 @@ function ScholarsPage() {
   ]);
   return (
     <div style={{padding:32}}>
-      <SH title="Scholars" sub={`${SCHOLARS.length} total scholars enrolled`} onAction={()=>{}} actionIcon="plus" actionLabel="Add Scholar"/>
+      <SH title="Scholars" sub={`${scholars.length} total scholars enrolled`} onAction={()=>{}} actionIcon="plus" actionLabel="Add Scholar"/>
       <div style={{display:"flex",gap:12,marginBottom:24}}>
         <div style={{flex:1,position:"relative"}}>
           <div style={{position:"absolute",left:12,top:"50%",transform:"translateY(-50%)"}}>

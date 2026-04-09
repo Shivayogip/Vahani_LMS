@@ -1,4 +1,5 @@
 import { useState } from "react";
+import axios from "axios";
 
 import { T } from "../theme";
 
@@ -6,9 +7,10 @@ import Logo from "../components/Logo";
 import Icon from "../components/Icon";
 import Field from "../components/Field";
 
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../firebase";
+// import { signInWithEmailAndPassword } from "firebase/auth";
+// import { auth } from "../firebase";
 
+const API_BASE = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 function Login({ onLogin }) {
 
@@ -36,48 +38,30 @@ function Login({ onLogin }) {
 
     setLoading(true);
 
-    const userCredential = await signInWithEmailAndPassword(
-      auth,
+    // 🔹 SEND LOGIN REQUEST TO BACKEND
+    const res = await axios.post(`${API_BASE}/api/auth/login`, {
       email,
-      password
-    );
-
-    const user = userCredential.user;
-
-    console.log("Logged in user:", user);
-
-    // Get Firebase token
-    const token = await user.getIdToken();
-
-    console.log("Firebase Token:", token);
-
-    // Save token locally
-    localStorage.setItem("token", token);
-
-    // 🔹 SEND TOKEN TO BACKEND
-    const res = await fetch("http://localhost:5000/api/auth/firebase-login",{
-      method:"POST",
-      headers:{
-        "Content-Type":"application/json",
-        Authorization:`Bearer ${token}`
-      },
-      body: JSON.stringify({
-        role: role
-      })
+      password,
+      role
     });
 
-    const data = await res.json();
+    const data = res.data;
 
     console.log("Backend response:", data);
 
+    // Save token and user info locally
+    localStorage.setItem("token", data.token);
+    localStorage.setItem("user", JSON.stringify(data.user));
+
     // Continue login
-    onLogin(role);
+    onLogin(data.user.role);
 
   }
   catch(err){
 
     console.error(err);
-    alert("Login failed: " + err.message);
+    const msg = err.response?.data?.error || err.message;
+    alert("Login failed: " + msg);
 
   }
 

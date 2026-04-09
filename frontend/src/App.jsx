@@ -34,7 +34,26 @@ export default function App() {
     fetch(base+"/")
       .then(r=>setBackendOk(r.ok))
       .catch(()=>setBackendOk(false));
+
+    const token = localStorage.getItem("token");
+    const userStr = localStorage.getItem("user");
+    if (token && userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        setRole(user.role);
+        setScreen("app");
+      } catch (e) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+      }
+    }
   },[]);
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("user");
+    setScreen("landing");
+  };
 
   const renderPage=()=>{
     switch(page){
@@ -101,7 +120,7 @@ export default function App() {
           page={page}
           setPage={setPage}
           role={role}
-          onLogout={()=>setScreen("landing")}
+          onLogout={handleLogout}
         />
 
         <div style={{flex:1,display:"flex",flexDirection:"column"}}>

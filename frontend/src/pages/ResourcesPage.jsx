@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 import { T } from "../theme";
-import { RESOURCES } from "../data/data";
+import { apiFetch } from "../api";
 
 import SH from "../components/SH";
 import Card from "../components/Card";
@@ -11,11 +11,27 @@ import Pill from "../components/Pill";
 
 function ResourcesPage({ role }) {
   const TM={Video:{icon:"video",color:"#5B35B0"},Document:{icon:"doc",color:T.navy},Notes:{icon:"pencil",color:T.success}};
+  const [resources, setResources] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [typeFilter,setTypeFilter]=useState("All");
   const [programmeFilter,setProgrammeFilter]=useState("All");
   const [dateFilter,setDateFilter]=useState("All");
   
-  const programmes=["All",...new Set(RESOURCES.map(r=>r.programme))];
+  useEffect(() => {
+    const fetchResources = async () => {
+      try {
+        const data = await apiFetch("/api/resources");
+        setResources(data);
+      } catch (error) {
+        console.error("Error fetching resources:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchResources();
+  }, []);
+
+  const programmes=["All",...new Set(resources.map(r=>r.course?.name).filter(Boolean))];
   
   const getDateCategory=(dateStr)=>{
     const date=new Date(dateStr);
@@ -27,13 +43,15 @@ function ResourcesPage({ role }) {
     return"Older";
   };
   
-  const filtered=RESOURCES.filter(r=>{
+  const filtered=resources.filter(r=>{
     const typeMatch=typeFilter==="All"||r.type===typeFilter;
-    const progMatch=programmeFilter==="All"||r.programme===programmeFilter;
-    const dateCategory=getDateCategory(r.date);
+    const progMatch=programmeFilter==="All"||r.course?.name===programmeFilter;
+    const dateCategory=getDateCategory(r.createdAt || r.date);
     const dateMatch=dateFilter==="All"||dateCategory===dateFilter;
     return typeMatch&&progMatch&&dateMatch;
   });
+
+  if (loading) return <div style={{padding:32}}>Loading...</div>;
   return (
     <div style={{padding:32}}>
       <SH title="Learning Resources" sub="Programme-wise videos, documents, and notes"
@@ -80,7 +98,7 @@ function ResourcesPage({ role }) {
         {filtered.map(r=>{
           const tm=TM[r.type];
           return (
-            <Card key={r.id} style={{transition:"all .2s"}}
+            <Card key={r._id || r.id} style={{transition:"all .2s"}}
               onMouseEnter={e=>e.currentTarget.style.boxShadow=`0 12px 40px ${T.shadowMd}`}
               onMouseLeave={e=>e.currentTarget.style.boxShadow=`0 2px 12px ${T.shadow}`}>
               <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:14}}>
